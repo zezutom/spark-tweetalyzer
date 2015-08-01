@@ -6,6 +6,7 @@
   - [Step 1: Download and build Spark 1.4.1](#step-1-download-and-build-spark-141)
   - [Step 2: Set SPARK_HOME](#step-2-set-spark_home)
   - [Step 3: Build the project](#step-3-build-the-project)
+  - [Step 4: Create your OAuth Credentials](#step-4-create-your-oauth-credentials)
 - [Popular Hashtags Counter](#popular-hashtags-counter)
 - [Twitter Stream Sentiment Analysis](#twitter-stream-sentiment-analysis)
 
@@ -66,8 +67,40 @@ The build requires Maven 3 and Java 8: ```cd <YOUR PROJECT DIRECTORY> && mvn cle
 
 At this point you should be ready to run the applications described below.
 
-## Popular Hashtags Counter
+### Step 4: Create your OAuth Credentials
+Register a new app on Twitter in order to get the required credentials (customer key + secret, access token + secret).
 
+## Popular Hashtags Counter
+A "hello world" kind of app, showcasing the elementary features of the Spark's Twitter Streaming API. It is based on the official sample called [TwitterPopularTags](https://github.com/apache/spark/blob/master/examples/src/main/scala/org/apache/spark/examples/streaming/TwitterPopularTags.scala). Unlike the original example, this app reads configuration from a property file and allows to save processing output to a configurable directory - courtesy: [Databricks: Collect a Dataset of Tweets](http://databricks.gitbooks.io/databricks-spark-reference-applications/content/twitter_classifier/collect.html).
+
+Default configuraton:
+
+```
+# Spark config
+spark.master.url=local[4]
+
+# Twitter credentials
+consumer.key=YOUR CONSUMER KEY
+consumer.secret=YOUR SECRET KEY
+access.token=YOUR ACCESS TOKEN KEY
+access.token.secret=YOUR ACCESS TOKEN SECRET
+
+# Streaming context - polling frequency
+stream.seconds=2
+
+# How often to seek for the most popular hash tags in "real time"
+twitter.tag.seconds=10
+
+# How often to build a "historical" overview of trending hash tags
+twitter.tag.history.seconds=60
+```
+
+How to run:
+
+```
+$SPARK_HOME/bin/spark-submit \
+--class "org.zezutom.spark.tweetalyzer.PopularHashTagsCounter" \ target/tweetalyzer-1.0-SNAPSHOT-jar-with-dependencies.jar
+```
 
 ## Twitter Stream Sentiment Analysis
 TODO
