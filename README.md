@@ -99,7 +99,9 @@ How to run:
 
 ```
 $SPARK_HOME/bin/spark-submit \
---class "org.zezutom.spark.tweetalyzer.PopularHashTagsCounter" \ target/tweetalyzer-1.0-SNAPSHOT-jar-with-dependencies.jar
+--class "org.zezutom.spark.tweetalyzer.PopularHashTagsCounter" \
+
+target/tweetalyzer-1.0-SNAPSHOT-jar-with-dependencies.jar
 ```
 
 ## Twitter Stream Sentiment Analysis
