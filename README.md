@@ -1,5 +1,14 @@
 # Twitter Analysis with Apache Spark
 
+## Contents
+
+- [Get Started](#get-started)
+  - [Step 1: Download and build Spark 1.4.1](#step-1-download-and-build-spark-141)
+  - [Step 2: Set SPARK_HOME](#step-2-set-spark_home)
+  - [Step 3: Build the project](#step-3-build-the-project)
+- [Popular Hashtags Counter](#popular-hashtags-counter)
+- [Twitter Stream Sentiment Analysis](#twitter-stream-sentiment-analysis)
+
 ## Get Started
 
 The application has been tested on [Spark 1.4.1](http://spark.apache.org/releases/spark-release-1-4-1.html) with a built-in [support for Scala 2.11](http://spark.apache.org/docs/latest/building-spark.html#building-for-scala-211).
@@ -52,12 +61,13 @@ Here is the relevant part of my ```~/.bash_profile```
 export SPARK_HOME=/Users/tom/Programming/spark-1.4.1
 ```
 
-### Step 3: Build the Project
+### Step 3: Build the project
 The build requires Maven 3 and Java 8: ```cd <YOUR PROJECT DIRECTORY> && mvn clean install```
 
 At this point you should be ready to run the applications described below.
 
 ## Popular Hashtags Counter
+
 
 ## Twitter Stream Sentiment Analysis
 TODO
