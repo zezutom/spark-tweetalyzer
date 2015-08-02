@@ -1,11 +1,13 @@
 package org.zezutom.spark.tweetalyzer
 
+import java.nio.file.Files
 import java.util.Properties
 
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.twitter.TwitterUtils
-import org.apache.spark.streaming.{Seconds, StreamingContext}
+import org.apache.spark.streaming.{Duration, Seconds, StreamingContext}
+import twitter4j.Status
 
 import scala.compat.Platform
 
@@ -15,6 +17,16 @@ import scala.compat.Platform
  * target/tweetalyzer-1.0-SNAPSHOT-jar-with-dependencies.jar
  */
 object PopularHashTagsCounter {
+
+  // Transforms a stream into a hash count map
+  def count(stream:DStream[Status], windowDuration: Duration): DStream[(String, Int)] = {
+    //stream.saveAsTextFiles("stream_"+ Platform.currentTime)
+    stream
+      .flatMap(status => status.getText.split(" ").filter(_.startsWith("#")))  // extract hashtags
+      .map((_, 1)).reduceByKeyAndWindow(_ + _, windowDuration)
+      .map{case (topic, count) => (topic, count)}
+      .transform(_.sortBy(pair => pair._2, ascending = false))
+  }
 
   def main(args: Array[String]) {
 
@@ -37,35 +49,33 @@ object PopularHashTagsCounter {
     System.setProperty("twitter4j.oauth.accessTokenSecret", accessTokenSecret)
 
     // Timing and frequency
-    def getSeconds(propName:String): Long = config.getProperty(propName).toLong
+    def getSeconds(propName:String): Duration = Seconds(config.getProperty(propName).toLong)
 
     val (streamSeconds, twitterTagSeconds, twitterTagHistorySeconds) =
       ( getSeconds("stream.seconds"),
-        getSeconds("stream.seconds"),
-        getSeconds("stream.seconds"))
+        getSeconds("twitter.tag.seconds"),
+        getSeconds("twitter.tag.history.seconds"))
 
     // Spark config
     val masterUrl = config.getProperty("master.url", "local[2]")
-    val sparkConf = new SparkConf().setMaster(masterUrl).setAppName("TwitterPopularTags")
-    val ssc = new StreamingContext(sparkConf, Seconds(streamSeconds))
+    val appName = getClass.getSimpleName
+    val checkpointDir = Files.createTempDirectory(appName).toString
+    val sparkConf = new SparkConf().setMaster(masterUrl).setAppName(appName)
+
+    val ssc = new StreamingContext(sparkConf, streamSeconds)
+    ssc.checkpoint(checkpointDir)
+
     val stream = TwitterUtils.createStream(ssc, None)
 
-    // Resolve hash tags
-    val hashTags = stream.flatMap(status => status.getText.split(" ").filter(_.startsWith("#")))
-
-    // Count occurrences
-    def count(seconds:Long): DStream[(Int, String)] =
-      hashTags.map((_, 1)).reduceByKeyAndWindow(_ + _, Seconds(seconds))
-        .map{case (topic, count) => (count, topic)}
-        .transform(_.sortByKey(ascending = false))
-    val topCounts = count(twitterTagSeconds)
-    val topCountsHistory = count(twitterTagHistorySeconds)
+    // Count the most popular hashtags
+    val topCounts = count(stream, twitterTagSeconds)
+    val topCountsHistory = count(stream, twitterTagHistorySeconds)
 
     // Output directory
     val outputDir = config.getProperty("output.dir", "tweets")
 
     // Prints Top 10 topics both to the console and the output directory
-    def printTop10(counts:DStream[(Int, String)]) =
+    def printTop10(counts:DStream[(String, Int)]) =
       counts.foreachRDD(rdd => {
         val topList = rdd.take(10)
         println(s"\nPopular topics in last $twitterTagHistorySeconds seconds (%s total):".format(rdd.count()))

@@ -15,9 +15,9 @@
         <java.version>1.8</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <spark.version>1.4.1</spark.version>
+        <spark.version>1.4.0</spark.version>
         <scala.version.major>2.11</scala.version.major>
-        <scala.version.minor>6</scala.version.minor>
+        <scala.version.minor>7</scala.version.minor>
         <scala.version>${scala.version.major}.${scala.version.minor}</scala.version>
     </properties>
 
@@ -46,6 +46,12 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>1.10.19</version>
             <scope>test</scope>
         </dependency>
         <dependency>
