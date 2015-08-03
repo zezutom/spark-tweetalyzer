@@ -7,7 +7,6 @@ import org.apache.spark.SparkConf
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.twitter.TwitterUtils
 import org.apache.spark.streaming.{Duration, Seconds, StreamingContext}
-import twitter4j.Status
 
 import scala.compat.Platform
 
@@ -19,14 +18,14 @@ import scala.compat.Platform
 object PopularHashTagsCounter {
 
   // Transforms a stream into a hash count map
-  def count(stream:DStream[Status], windowDuration: Duration): DStream[(String, Int)] = {
-    //stream.saveAsTextFiles("stream_"+ Platform.currentTime)
+  def count(stream:DStream[String], windowDuration: Duration): DStream[(String, Int)] =
     stream
-      .flatMap(status => status.getText.split(" ").filter(_.startsWith("#")))  // extract hashtags
+      .flatMap(text => text.split(" ").filter(_.startsWith("#")))   // extract hashtags
+      //.flatMap(status => status.getText.split(" ").filter(_.startsWith("#")))  // extract hashtags
       .map((_, 1)).reduceByKeyAndWindow(_ + _, windowDuration)
       .map{case (topic, count) => (topic, count)}
       .transform(_.sortBy(pair => pair._2, ascending = false))
-  }
+
 
   def main(args: Array[String]) {
 
@@ -65,7 +64,7 @@ object PopularHashTagsCounter {
     val ssc = new StreamingContext(sparkConf, streamSeconds)
     ssc.checkpoint(checkpointDir)
 
-    val stream = TwitterUtils.createStream(ssc, None)
+    val stream = TwitterUtils.createStream(ssc, None).map(status => status.getText)
 
     // Count the most popular hashtags
     val topCounts = count(stream, twitterTagSeconds)
