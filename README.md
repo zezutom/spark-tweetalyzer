@@ -97,16 +97,15 @@ twitter.tag.history.seconds=60
 
 How to run:
 
-Application
+1. Package the app (an uber-JAR): ```sbt assembly```
+2. Run
 ```
 $SPARK_HOME/bin/spark-submit \
 --class "org.zezutom.spark.tweetalyzer.PopularHashTagsCounter" \
-target/tweetalyzer-1.0-SNAPSHOT-jar-with-dependencies.jar
+target/scala-2.11/tweetalyzer-assembly-0.1.0.jar
 ```
 
-Package the app (an uber-JAR): ```sbt assembly```
-
-Unit tests: ```sbt test```
+Here is how to run the unit tests: ```sbt test```
 
 Apropos, unit tests, or rather lightweight integration tests. Yeah, it's been a bit of a challenge due to timing issues with streaming. Big thanks to Marcin Kuthan for his [excellent blog post](http://mkuthan.github.io/blog/2015/03/01/spark-unit-testing/) and [invaluable examples on GitHub](https://github.com/mkuthan/example-spark). My implementation follows his approach practically to the letter. Another resource I found very helpful was Holden Karau's [article about Effective testing of Spark programs and jobs](http://strataconf.com/big-data-conference-ny-2015/public/schedule/detail/42993). Her de-facto [framework for Spark's testing](https://github.com/holdenk/spark-testing-base) is definitely worth a check.
 
