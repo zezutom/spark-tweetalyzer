@@ -7,6 +7,7 @@
   - [Step 2: Set SPARK_HOME](#step-2-set-spark_home)
   - [Step 3: Build the project](#step-3-build-the-project)
   - [Step 4: Create your OAuth Credentials](#step-4-create-your-oauth-credentials)
+  - [Step 5: Externalize App Config](#step-5-externalize-app-config)
 - [Popular Hashtags Counter](#popular-hashtags-counter)
 - [Twitter Stream Sentiment Analysis](#twitter-stream-sentiment-analysis)
 
