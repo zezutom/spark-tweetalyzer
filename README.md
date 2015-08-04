@@ -70,6 +70,22 @@ At this point you should be ready to run the applications described below.
 ### Step 4: Create your OAuth Credentials
 Register a new app on Twitter in order to get the required credentials (customer key + secret, access token + secret).
 
+### Step 5: Externalize App Config
+The app ships with default configuration - see [app.properties](https://github.com/zezutom/spark-tweetalyzer/blob/master/src/main/resources/app.properties). I strongly suggest you do NOT put your actual Twitter credentials into this file. Do the following instead:
+
+1. Create a new directory outside of this project and associate it with a system variable called TWEETALYZER_CONF_DIR
+
+Here is the relevant part of my ```~/.bash_profile```
+
+```
+# Configuration directory for the Spark Tweetalyzer project
+export TWEETALYZER_CONF_DIR=/Users/tom/Documents/tweetalyzer/
+```
+
+2. Copy the default app.properties into the new directory and replace value placeholders with valid Twitter credentials.
+ 
+From now on, the app will read the config from your custom directory and it will only use the packaged config file as a fallback.
+
 ## Popular Hashtags Counter
 A "hello world" kind of app, showcasing the elementary features of the Spark's Twitter Streaming API. It is based on the official sample called [TwitterPopularTags](https://github.com/apache/spark/blob/master/examples/src/main/scala/org/apache/spark/examples/streaming/TwitterPopularTags.scala). Unlike the original example, this app reads configuration from a property file and allows to save processing output to a configurable directory - courtesy: [Databricks: Collect a Dataset of Tweets](http://databricks.gitbooks.io/databricks-spark-reference-applications/content/twitter_classifier/collect.html).
 
