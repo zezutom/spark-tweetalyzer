@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/zezutom/spark-tweetalyzer.svg?branch=master)](https://travis-ci.org/zezutom/spark-tweetalyzer)
 # Twitter Analysis with Apache Spark
 
 ## Contents
