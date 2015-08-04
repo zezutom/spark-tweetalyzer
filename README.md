@@ -63,7 +63,7 @@ export SPARK_HOME=/Users/tom/Programming/spark-1.4.1
 ```
 
 ### Step 3: Build the project
-The build requires Maven 3 and Java 8: ```cd <YOUR PROJECT DIRECTORY> && mvn clean install```
+The build requires [SBT](http://www.scala-sbt.org/) (tested on 0.13.8) and Java 8: ```cd <YOUR PROJECT DIRECTORY> && sbt assembly```
 
 At this point you should be ready to run the applications described below.
 
@@ -104,9 +104,9 @@ $SPARK_HOME/bin/spark-submit \
 target/tweetalyzer-1.0-SNAPSHOT-jar-with-dependencies.jar
 ```
 
-Maven build: ```mvn install```
+Package the app (an uber-JAR): ```sbt assembly```
 
-Unit tests: ```mvn test```
+Unit tests: ```sbt test```
 
 Apropos, unit tests, or rather lightweight integration tests. Yeah, it's been a bit of a challenge due to timing issues with streaming. Big thanks to Marcin Kuthan for his [excellent blog post](http://mkuthan.github.io/blog/2015/03/01/spark-unit-testing/) and [invaluable examples on GitHub](https://github.com/mkuthan/example-spark). My implementation follows his approach practically to the letter. Another resource I found very helpful was Holden Karau's [article about Effective testing of Spark programs and jobs](http://strataconf.com/big-data-conference-ny-2015/public/schedule/detail/42993). Her de-facto [framework for Spark's testing](https://github.com/holdenk/spark-testing-base) is definitely worth a check.
 
