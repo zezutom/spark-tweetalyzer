@@ -1,6 +1,6 @@
 package org.zezutom.spark.tweetalyzer
 
-import java.nio.file.Files
+import java.nio.file.{Files, Paths}
 import java.util.Properties
 
 import org.apache.spark.SparkConf
@@ -9,11 +9,12 @@ import org.apache.spark.streaming.twitter.TwitterUtils
 import org.apache.spark.streaming.{Duration, Seconds, StreamingContext}
 
 import scala.compat.Platform
+import scala.io.Source
 
 /**
  * $SPARK_HOME/bin/spark-submit \
  * --class "org.zezutom.spark.tweetalyzer.PopularHashTagsCounter" \
- * target/tweetalyzer-1.0-SNAPSHOT-jar-with-dependencies.jar
+ * target/scala-2.11/tweetalyzer-assembly-0.1.0.jar
  */
 object PopularHashTagsCounter {
 
@@ -21,7 +22,6 @@ object PopularHashTagsCounter {
   def count(stream:DStream[String], windowDuration: Duration): DStream[(String, Int)] =
     stream
       .flatMap(text => text.split(" ").filter(_.startsWith("#")))   // extract hashtags
-      //.flatMap(status => status.getText.split(" ").filter(_.startsWith("#")))  // extract hashtags
       .map((_, 1)).reduceByKeyAndWindow(_ + _, windowDuration)
       .map{case (topic, count) => (topic, count)}
       .transform(_.sortBy(pair => pair._2, ascending = false))
@@ -29,16 +29,28 @@ object PopularHashTagsCounter {
 
   def main(args: Array[String]) {
 
-    // App config
-    val config = new Properties()
-    config.load(getClass.getResourceAsStream("/app.properties"))
+    // App config:
+    //
+    // Don't put your Twitter credentials in the config file (app.properties) shipped with the packaged app.
+    // Instead, place the app.properties containing the Twitter API keys somewhere in your filesystem
+    // and access it by using the TWEETALYZER_CONF_DIR environment variable
+    val conf = new Properties()
+
+    // Resolve path to the config file
+    def confMap(dir:String): String = Paths.get(dir, "app.properties").toString
+
+    // Read the config from the filesystem, or fall back to the bundled one (not recommended, see above)
+    System.getenv("TWEETALYZER_CONF_DIR") match {
+      case null => conf.load(getClass.getResourceAsStream(confMap("/")))
+      case foundPath => conf.load(Source.fromFile(confMap(foundPath)).bufferedReader())
+    }
 
     // Load Twitter credentials
     val (consumerKey, consumerSecret, accessToken, accessTokenSecret) =
-      ( config.getProperty("consumer.key"),
-        config.getProperty("consumer.secret"),
-        config.getProperty("access.token"),
-        config.getProperty("access.token.secret"))
+      ( conf.getProperty("consumer.key"),
+        conf.getProperty("consumer.secret"),
+        conf.getProperty("access.token"),
+        conf.getProperty("access.token.secret"))
 
     // Set the system properties so that Twitter4j library used by twitter stream
     // can use them to generate OAuth credentials
@@ -48,7 +60,7 @@ object PopularHashTagsCounter {
     System.setProperty("twitter4j.oauth.accessTokenSecret", accessTokenSecret)
 
     // Timing and frequency
-    def getSeconds(propName:String): Duration = Seconds(config.getProperty(propName).toLong)
+    def getSeconds(propName:String): Duration = Seconds(conf.getProperty(propName).toLong)
 
     val (streamSeconds, twitterTagSeconds, twitterTagHistorySeconds) =
       ( getSeconds("stream.seconds"),
@@ -56,7 +68,7 @@ object PopularHashTagsCounter {
         getSeconds("twitter.tag.history.seconds"))
 
     // Spark config
-    val masterUrl = config.getProperty("master.url", "local[2]")
+    val masterUrl = conf.getProperty("master.url", "local[2]")
     val appName = getClass.getSimpleName
     val checkpointDir = Files.createTempDirectory(appName).toString
     val sparkConf = new SparkConf().setMaster(masterUrl).setAppName(appName)
@@ -71,7 +83,7 @@ object PopularHashTagsCounter {
     val topCountsHistory = count(stream, twitterTagHistorySeconds)
 
     // Output directory
-    val outputDir = config.getProperty("output.dir", "tweets")
+    val outputDir = conf.getProperty("output.dir", "tweets")
 
     // Prints Top 10 topics both to the console and the output directory
     def printTop10(counts:DStream[(String, Int)]) =
