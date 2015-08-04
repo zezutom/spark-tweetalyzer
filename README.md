@@ -107,7 +107,7 @@ target/scala-2.11/tweetalyzer-assembly-0.1.0.jar
 
 Here is how to run the integration tests: ```sbt test```
 
-Please note that integration tests run on Spark 1.4.0. That's due to the fact that checkpoints won't work for test streams, which are not serializable.
+Please note that integration tests run on Spark 1.4.0. That's due to the fact that in the newer version of Spark checkpoints (mandatory) won't work for test streams, which are not serializable.
 
 Apropos, test automation. Yeah, it's been a bit of a challenge due to an asynchronous nature of the streaming. Big thanks to Marcin Kuthan for his [excellent blog post](http://mkuthan.github.io/blog/2015/03/01/spark-unit-testing/) and [invaluable examples on GitHub](https://github.com/mkuthan/example-spark). My implementation follows his approach practically to the letter. Another resource I found very helpful was Holden Karau's [article about Effective testing of Spark programs and jobs](http://strataconf.com/big-data-conference-ny-2015/public/schedule/detail/42993). Her de-facto [framework for Spark's testing](https://github.com/holdenk/spark-testing-base) is definitely worth a check.
 
