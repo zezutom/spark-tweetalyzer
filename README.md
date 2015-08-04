@@ -14,7 +14,7 @@
 
 The application has been tested on [Spark 1.4.1](http://spark.apache.org/releases/spark-release-1-4-1.html) with a built-in [support for Scala 2.11](http://spark.apache.org/docs/latest/building-spark.html#building-for-scala-211).
 
-### Step 1: Download and build Spark 1.4.1
+### Step 1: Download and build Spark
 
 Download Spark source package and build it so that it supports Scala 2.11. Follow the instructions [here](http://spark.apache.org/downloads.html) and [here](http://spark.apache.org/docs/latest/building-spark.html#building-for-scala-211).
 
@@ -105,9 +105,11 @@ $SPARK_HOME/bin/spark-submit \
 target/scala-2.11/tweetalyzer-assembly-0.1.0.jar
 ```
 
-Here is how to run the unit tests: ```sbt test```
+Here is how to run the integration tests: ```sbt test```
 
-Apropos, unit tests, or rather lightweight integration tests. Yeah, it's been a bit of a challenge due to timing issues with streaming. Big thanks to Marcin Kuthan for his [excellent blog post](http://mkuthan.github.io/blog/2015/03/01/spark-unit-testing/) and [invaluable examples on GitHub](https://github.com/mkuthan/example-spark). My implementation follows his approach practically to the letter. Another resource I found very helpful was Holden Karau's [article about Effective testing of Spark programs and jobs](http://strataconf.com/big-data-conference-ny-2015/public/schedule/detail/42993). Her de-facto [framework for Spark's testing](https://github.com/holdenk/spark-testing-base) is definitely worth a check.
+Please note that integration tests run on Spark 1.4.0. That's due to the fact that checkpoints won't work for test streams, which are not serializable.
+
+Apropos, test automation. Yeah, it's been a bit of a challenge due to an asynchronous nature of the streaming. Big thanks to Marcin Kuthan for his [excellent blog post](http://mkuthan.github.io/blog/2015/03/01/spark-unit-testing/) and [invaluable examples on GitHub](https://github.com/mkuthan/example-spark). My implementation follows his approach practically to the letter. Another resource I found very helpful was Holden Karau's [article about Effective testing of Spark programs and jobs](http://strataconf.com/big-data-conference-ny-2015/public/schedule/detail/42993). Her de-facto [framework for Spark's testing](https://github.com/holdenk/spark-testing-base) is definitely worth a check.
 
 ## Twitter Stream Sentiment Analysis
 TODO
