@@ -2,25 +2,14 @@ package org.zezutom.spark.tweetalyzer
 
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.{Seconds, Time}
-import org.junit.runner.RunWith
-import org.scalatest.concurrent.Eventually
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.time.{Millis, Span}
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{FlatSpec, GivenWhenThen, Matchers}
-
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
-@RunWith(classOf[JUnitRunner])
-class PopularHashTagsCounterSpec  extends FlatSpec with SparkStreamingSpec with GivenWhenThen with Matchers with Eventually {
+class PopularHashTagsCounterSpec  extends FlatSpec with SparkStreamingSpec with GivenWhenThen with Matchers with Eventually with IntegrationPatience {
 
   private val windowDuration = Seconds(4)
-
-  // A default timeout for the trait 'eventually'
-  // Please bear in mind the timing matters (millis) and is a bit shaky
-  // Try to change the milliseconds below if there are unexplained failures in the 'eventually' block
-  implicit override val patienceConfig =
-    PatienceConfig(timeout = scaled(Span(2500, Millis)))
 
   "Sample set" should "be counted" in {
     Given("streaming context is initialized")

@@ -30,6 +30,7 @@ trait SparkStreamingSpec extends SparkSpec {
 
   override def afterAll(): Unit = {
     if (_ssc != null) {
+      // Spark gets stuck when shutting down gracefully :(
       _ssc.stop(stopSparkContext = false, stopGracefully = false)
       _ssc = null
     }
