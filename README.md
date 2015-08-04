@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/zezutom/spark-tweetalyzer.svg?branch=master)](https://travis-ci.org/zezutom/spark-tweetalyzer)
+[![Coverage Status](https://coveralls.io/repos/zezutom/spark-tweetalyzer/badge.svg?branch=master&service=github)](https://coveralls.io/github/zezutom/spark-tweetalyzer?branch=master)
 # Twitter Analysis with Apache Spark
 
 ## Contents
