@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/zezutom/spark-tweetalyzer.svg?branch=master)](https://travis-ci.org/zezutom/spark-tweetalyzer)
+[![Coverage Status](https://coveralls.io/repos/zezutom/spark-tweetalyzer/badge.svg?branch=master&service=github)](https://coveralls.io/github/zezutom/spark-tweetalyzer?branch=master)
 # Twitter Analysis with Apache Spark
 
 ## Contents
@@ -83,7 +85,7 @@ Here is the relevant part of my ```~/.bash_profile```
 export TWEETALYZER_CONF_DIR=/Users/tom/Documents/tweetalyzer/
 ```
 
-Secondly, copy the default app.properties into the new directory and replace value placeholders with valid Twitter credentials.
+Next, copy the default app.properties into the new directory and replace value placeholders with valid Twitter credentials.
  
 From now on, the app will read the config from your custom directory and it will only use the packaged config file as a fallback.
 
