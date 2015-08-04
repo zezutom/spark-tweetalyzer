@@ -1,11 +1,9 @@
-lazy val scalaVersionMajor = "2.11"
-
 lazy val sparkVersion = "1.4.0"
 
 lazy val commonSettings = Seq(
   version := "0.1.0",
   organization := "org.zezutom",
-  scalaVersion := scalaVersionMajor + ".7"
+  scalaVersion := "2.11.7"
 )
 
 /** Assembly Plugin Configuration **/
@@ -26,10 +24,10 @@ lazy val root = (project in file(".")).
   settings(
     name := "tweetalyzer",
     libraryDependencies ++= Seq(
-      "org.apache.spark" % ("spark-core_" + scalaVersionMajor) % sparkVersion % "provided",
-      "org.apache.spark" % ("spark-streaming_" + scalaVersionMajor) % sparkVersion % "provided",
-      "org.apache.spark" % ("spark-streaming-twitter_" + scalaVersionMajor) % sparkVersion,
+      "org.apache.spark" %% "spark-core" % sparkVersion % "provided",
+      "org.apache.spark" %% "spark-streaming" % sparkVersion % "provided",
+      "org.apache.spark" %% "spark-streaming-twitter" % sparkVersion,
       "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
-      "org.scalatest" % ("scalatest_" + scalaVersionMajor) % "3.0.0-M4" % "test" 
+      "org.scalatest" %% "scalatest" % "3.0.0-M4" % "test" 
     )
   )
