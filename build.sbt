@@ -29,6 +29,7 @@ lazy val root = (project in file(".")).
       "org.apache.spark" % ("spark-core_" + scalaVersionMajor) % sparkVersion % "provided",
       "org.apache.spark" % ("spark-streaming_" + scalaVersionMajor) % sparkVersion % "provided",
       "org.apache.spark" % ("spark-streaming-twitter_" + scalaVersionMajor) % sparkVersion,
+      "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
       "org.scalatest" % ("scalatest_" + scalaVersionMajor) % "3.0.0-M4" % "test" 
     )
   )

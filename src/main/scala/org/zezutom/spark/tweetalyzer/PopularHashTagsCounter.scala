@@ -3,11 +3,11 @@ package org.zezutom.spark.tweetalyzer
 import java.nio.file.{Files, Paths}
 import java.util.Properties
 
+import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.twitter.TwitterUtils
 import org.apache.spark.streaming.{Duration, Seconds, StreamingContext}
-
 import scala.compat.Platform
 import scala.io.Source
 
@@ -16,7 +16,7 @@ import scala.io.Source
  * --class "org.zezutom.spark.tweetalyzer.PopularHashTagsCounter" \
  * target/scala-2.11/tweetalyzer-assembly-0.1.0.jar
  */
-object PopularHashTagsCounter {
+object PopularHashTagsCounter extends LazyLogging {
 
   // Transforms a stream into a hash count map
   def count(stream:DStream[String], windowDuration: Duration): DStream[(String, Int)] =
@@ -27,13 +27,17 @@ object PopularHashTagsCounter {
       .transform(_.sortBy(pair => pair._2, ascending = false))
 
 
-  def main(args: Array[String]) {
+  /**
+   * App config:
+   *
+   * Don't put your Twitter credentials in the config file (app.properties) shipped with the packaged app.
+   * Instead, place the app.properties containing the Twitter API keys somewhere in your filesystem
+   * and access it by using the TWEETALYZER_CONF_DIR environment variable.
+   *
+   * @return Application properties
+   */
+  private def loadConf(): Properties = {
 
-    // App config:
-    //
-    // Don't put your Twitter credentials in the config file (app.properties) shipped with the packaged app.
-    // Instead, place the app.properties containing the Twitter API keys somewhere in your filesystem
-    // and access it by using the TWEETALYZER_CONF_DIR environment variable
     val conf = new Properties()
 
     // Resolve path to the config file
@@ -46,6 +50,12 @@ object PopularHashTagsCounter {
     }
 
     // Load Twitter credentials
+    loadTwitterKeys(conf)
+
+    conf
+  }
+
+  private def loadTwitterKeys(conf:Properties): Unit = {
     val (consumerKey, consumerSecret, accessToken, accessTokenSecret) =
       ( conf.getProperty("consumer.key"),
         conf.getProperty("consumer.secret"),
@@ -58,6 +68,11 @@ object PopularHashTagsCounter {
     System.setProperty("twitter4j.oauth.consumerSecret", consumerSecret)
     System.setProperty("twitter4j.oauth.accessToken", accessToken)
     System.setProperty("twitter4j.oauth.accessTokenSecret", accessTokenSecret)
+  }
+
+  def main(args: Array[String]) {
+
+    val conf = loadConf()
 
     // Timing and frequency
     def getSeconds(propName:String): Duration = Seconds(conf.getProperty(propName).toLong)
@@ -85,12 +100,14 @@ object PopularHashTagsCounter {
     // Output directory
     val outputDir = conf.getProperty("output.dir", "tweets")
 
-    // Prints Top 10 topics both to the console and the output directory
+    // Prints Top N topics both to the console and the output directory
+    val topN = 10
+
     def printTop10(counts:DStream[(String, Int)]) =
       counts.foreachRDD(rdd => {
-        val topList = rdd.take(10)
-        println(s"\nPopular topics in last $twitterTagHistorySeconds seconds (%s total):".format(rdd.count()))
-        topList.foreach{case (count, tag) => println("%s (%s tweets)".format(tag, count))}
+        val topList = rdd.take(topN)
+        logger.info(s"\nPopular topics in last $twitterTagHistorySeconds seconds (%s total):".format(rdd.count()))
+        topList.foreach{case (count, tag) => logger.info("%s (%s tweets)".format(tag, count))}
         rdd.saveAsTextFile(outputDir + "_" + Platform.currentTime)
       })
 
@@ -99,7 +116,6 @@ object PopularHashTagsCounter {
 
     ssc.start()
     ssc.awaitTermination()
-
   }
 
 }
