@@ -7,7 +7,7 @@ import org.scalatest.{FlatSpec, GivenWhenThen, Matchers}
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
-class PopularHashTagsCounterSpec  extends FlatSpec with SparkStreamingSpec with GivenWhenThen with Matchers with Eventually with IntegrationPatience {
+class PopularHashTagsCounterSpec extends FlatSpec with SparkStreamingSpec with GivenWhenThen with Matchers with Eventually with IntegrationPatience {
 
   private val windowDuration = Seconds(4)
 

@@ -1,15 +1,14 @@
 package org.zezutom.spark.tweetalyzer
 
-import java.nio.file.{Files, Paths}
-import java.util.Properties
+import java.nio.file.Files
 
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.twitter.TwitterUtils
 import org.apache.spark.streaming.{Duration, Seconds, StreamingContext}
+
 import scala.compat.Platform
-import scala.io.Source
 
 /**
  * $SPARK_HOME/bin/spark-submit \
@@ -26,53 +25,9 @@ object PopularHashTagsCounter extends LazyLogging {
       .map{case (topic, count) => (topic, count)}
       .transform(_.sortBy(pair => pair._2, ascending = false))
 
-
-  /**
-   * App config:
-   *
-   * Don't put your Twitter credentials in the config file (app.properties) shipped with the packaged app.
-   * Instead, place the app.properties containing the Twitter API keys somewhere in your filesystem
-   * and access it by using the TWEETALYZER_CONF_DIR environment variable.
-   *
-   * @return Application properties
-   */
-  private def loadConf(): Properties = {
-
-    val conf = new Properties()
-
-    // Resolve path to the config file
-    def confMap(dir:String): String = Paths.get(dir, "app.properties").toString
-
-    // Read the config from the filesystem, or fall back to the bundled one (not recommended, see above)
-    System.getenv("TWEETALYZER_CONF_DIR") match {
-      case null => conf.load(getClass.getResourceAsStream(confMap("/")))
-      case foundPath => conf.load(Source.fromFile(confMap(foundPath)).bufferedReader())
-    }
-
-    // Load Twitter credentials
-    loadTwitterKeys(conf)
-
-    conf
-  }
-
-  private def loadTwitterKeys(conf:Properties): Unit = {
-    val (consumerKey, consumerSecret, accessToken, accessTokenSecret) =
-      ( conf.getProperty("consumer.key"),
-        conf.getProperty("consumer.secret"),
-        conf.getProperty("access.token"),
-        conf.getProperty("access.token.secret"))
-
-    // Set the system properties so that Twitter4j library used by twitter stream
-    // can use them to generate OAuth credentials
-    System.setProperty("twitter4j.oauth.consumerKey", consumerKey)
-    System.setProperty("twitter4j.oauth.consumerSecret", consumerSecret)
-    System.setProperty("twitter4j.oauth.accessToken", accessToken)
-    System.setProperty("twitter4j.oauth.accessTokenSecret", accessTokenSecret)
-  }
-
   def main(args: Array[String]) {
 
-    val conf = loadConf()
+    val conf = Util.instance.conf
 
     // Timing and frequency
     def getSeconds(propName:String): Duration = Seconds(conf.getProperty(propName).toLong)
