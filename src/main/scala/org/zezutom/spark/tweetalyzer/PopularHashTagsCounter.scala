@@ -1,13 +1,8 @@
 package org.zezutom.spark.tweetalyzer
 
-import java.nio.file.Files
-
 import com.typesafe.scalalogging.LazyLogging
-import org.apache.spark.SparkConf
+import org.apache.spark.streaming.Duration
 import org.apache.spark.streaming.dstream.DStream
-import org.apache.spark.streaming.twitter.TwitterUtils
-import org.apache.spark.streaming.{Duration, Seconds, StreamingContext}
-
 import scala.compat.Platform
 
 /**
@@ -16,6 +11,8 @@ import scala.compat.Platform
  * target/scala-2.11/tweetalyzer-assembly-0.1.0.jar
  */
 object PopularHashTagsCounter extends LazyLogging {
+
+  val util = Util.instance
 
   // Transforms a stream into a hash count map
   def count(stream:DStream[String], windowDuration: Duration): DStream[(String, Int)] =
@@ -27,33 +24,18 @@ object PopularHashTagsCounter extends LazyLogging {
 
   def main(args: Array[String]) {
 
-    val conf = Util.instance.conf
+    val ssc = util.streamContext(getClass.getSimpleName)
 
-    // Timing and frequency
-    def getSeconds(propName:String): Duration = Seconds(conf.getProperty(propName).toLong)
+    val stream = util.stream(ssc).map(status => status.getText)
 
-    val (streamSeconds, twitterTagSeconds, twitterTagHistorySeconds) =
-      ( getSeconds("stream.seconds"),
-        getSeconds("twitter.tag.seconds"),
-        getSeconds("twitter.tag.history.seconds"))
-
-    // Spark config
-    val masterUrl = conf.getProperty("master.url", "local[2]")
-    val appName = getClass.getSimpleName
-    val checkpointDir = Files.createTempDirectory(appName).toString
-    val sparkConf = new SparkConf().setMaster(masterUrl).setAppName(appName)
-
-    val ssc = new StreamingContext(sparkConf, streamSeconds)
-    ssc.checkpoint(checkpointDir)
-
-    val stream = TwitterUtils.createStream(ssc, None).map(status => status.getText)
+    val twitterTagHistorySeconds: Duration = util.getSeconds("twitter.tag.history.seconds")
 
     // Count the most popular hashtags
-    val topCounts = count(stream, twitterTagSeconds)
+    val topCounts = count(stream, util.getSeconds("twitter.tag.seconds"))
     val topCountsHistory = count(stream, twitterTagHistorySeconds)
 
     // Output directory
-    val outputDir = conf.getProperty("output.dir", "tweets")
+    val outputDir = util.conf.getProperty("output.dir", "tweets")
 
     // Prints Top N topics both to the console and the output directory
     val topN = 10
